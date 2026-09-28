@@ -1,0 +1,9 @@
+{
+  "name": "triple-seven",
+  "private": true,
+  "scripts": {
+    "dev": "npm --prefix backend run dev",
+    "start": "npm --prefix backend start",
+    "test": "npm --prefix backend test"
+  }
+}
