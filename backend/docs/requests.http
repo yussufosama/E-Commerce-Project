@@ -1,0 +1,97 @@
+# Example requests for a REST client that retains cookies.
+# Replace placeholders locally. This file must never contain real credentials.
+@base = http://127.0.0.1:5000
+@email = you@example.com
+@password = REPLACE_WITH_YOUR_OWN_LONG_PASSPHRASE
+@productId = REPLACE_WITH_PRODUCT_ID
+@orderId = REPLACE_WITH_ORDER_ID
+
+### Register (always creates customer role)
+POST {{base}}/api/users/register
+Content-Type: application/json
+X-Requested-With: TripleSeven
+
+{"name":"Your Name","email":"{{email}}","password":"{{password}}"}
+
+### Log in; retain the returned HttpOnly cookie
+POST {{base}}/api/users/login
+Content-Type: application/json
+X-Requested-With: TripleSeven
+
+{"email":"{{email}}","password":"{{password}}"}
+
+### Current user
+GET {{base}}/api/users/me
+
+### Catalog: copy a product _id into productId above
+GET {{base}}/api/products?page=1&limit=12
+
+### Set cart quantity; use the exact size/color from the product
+PUT {{base}}/api/cart/items
+Content-Type: application/json
+X-Requested-With: TripleSeven
+
+{"productId":"{{productId}}","size":"M","color":"Black","quantity":1}
+
+### Cart
+GET {{base}}/api/cart
+
+### Quote: configure SHIPPING_FEE_PIASTRES first
+GET {{base}}/api/orders/quote
+
+### Place order: use actual totals from quote and a fresh key for each NEW order.
+# Retrying this same request with the same key will not create a second order.
+POST {{base}}/api/orders
+Content-Type: application/json
+X-Requested-With: TripleSeven
+Idempotency-Key: replace-with-a-unique-order-key
+
+{"address":{"name":"Your Name","phone":"01012345678","governorate":"Cairo","city":"Cairo","street":"Your complete address","country":"EG"},"paymentMethod":"cash_on_delivery","expectedSubtotalPiastres":65000,"expectedTotalPiastres":70000}
+
+### Own order history
+GET {{base}}/api/orders
+
+### Own order detail
+GET {{base}}/api/orders/{{orderId}}
+
+### Cancel own pending order
+POST {{base}}/api/orders/{{orderId}}/cancel
+Content-Type: application/json
+X-Requested-With: TripleSeven
+
+{}
+
+### Admin: requires an account promoted using npm run make-admin
+POST {{base}}/api/admin/products
+Content-Type: application/json
+X-Requested-With: TripleSeven
+
+{"name":"777 Hoodie","slug":"777-hoodie","description":"Oversized hoodie","category":"hoodies","pricePiastres":125000,"variants":[{"size":"M","color":"Black","stock":10}]}
+
+### Admin: stock adjustment (positive adds, negative removes)
+PATCH {{base}}/api/admin/products/{{productId}}/inventory
+Content-Type: application/json
+X-Requested-With: TripleSeven
+
+{"size":"M","color":"Black","adjustment":5}
+
+### Admin: metadata update
+PATCH {{base}}/api/admin/products/{{productId}}
+Content-Type: application/json
+X-Requested-With: TripleSeven
+
+{"pricePiastres":130000}
+
+### Admin: fulfill order in sequence: confirmed, shipped, delivered
+PATCH {{base}}/api/admin/orders/{{orderId}}/status
+Content-Type: application/json
+X-Requested-With: TripleSeven
+
+{"status":"confirmed"}
+
+### Logout
+POST {{base}}/api/users/logout
+Content-Type: application/json
+X-Requested-With: TripleSeven
+
+{}

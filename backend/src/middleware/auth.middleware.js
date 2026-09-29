@@ -10,8 +10,8 @@ export async function requireAuth(req, res, next) {
     return res.status(401).json({ error: 'Authentication required.' });
   }
   // Check expiry explicitly: MongoDB TTL deletion is not immediate.
-  const session = await Session.findOne({ tokenHash: digest(token), expiresAt: { $gt: new Date() } }).populate('user');
-  if (!session?.user) return res.status(401).json({ error: 'Authentication required.' });
+  const session = await Session.findOne({ tokenHash: digest(token), expiresAt: { $gt: new Date() } }).populate({ path: 'user', select: '+sessionVersion' });
+  if (!session?.user || !session.user.emailVerified || session.version !== session.user.sessionVersion) return res.status(401).json({ error: 'Authentication required.' });
   req.user = publicUser(session.user);
   next();
 }

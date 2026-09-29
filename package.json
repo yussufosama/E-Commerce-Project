@@ -2,8 +2,14 @@
   "name": "triple-seven",
   "private": true,
   "scripts": {
+    "build": "npm --prefix frontend run build",
+    "predev": "npm run build",
+    "prestart": "npm run build",
+    "pretest": "npm run build",
+    "dev:frontend": "npm --prefix frontend run dev",
     "dev": "npm --prefix backend run dev",
     "start": "npm --prefix backend start",
-    "test": "npm --prefix backend test"
+    "test": "npm --prefix backend test",
+    "check:launch": "npm --prefix backend run check:launch"
   }
 }

@@ -11,13 +11,16 @@
     "dev": "node --env-file-if-exists=.env --watch src/main.js",
     "start": "node --env-file-if-exists=.env src/main.js",
     "seed": "node --env-file-if-exists=.env scripts/seed.js",
-    "test": "node --test"
+    "test": "node scripts/run-tests.js",
+    "make-admin": "node --env-file-if-exists=.env scripts/make-admin.js",
+    "check:launch": "node --env-file-if-exists=.env scripts/check-launch.js"
   },
   "dependencies": {
     "cookie-parser": "^1.4.7",
     "express": "^5.2.1",
     "express-rate-limit": "^8.7.0",
     "helmet": "^8.3.0",
-    "mongoose": "^9.10.2"
+    "mongoose": "^9.10.2",
+    "nodemailer": "^10.0.12"
   }
 }
