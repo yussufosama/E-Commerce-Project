@@ -1,5 +1,7 @@
 # Assets
 
+- `public/assets/triple-seven-black-transparent.png`: black-on-transparent edition used in the manifesto. Edited using the built-in image tool from the owner's logo. Prompt: preserve the cube geometry and lettering, convert white marks to black, remove the black background and all interior negative spaces to transparent alpha, and frame with a small clear margin. Verified RGBA transparency; original JPEG retained.
+
 - `public/assets/triple-seven-logo.jpeg`: original logo supplied by the owner. Copied without alteration.
 - `public/assets/editorial-hero.png`: generated with the built-in image generation tool. This is temporary editorial imagery, not a photograph of the store's real merchandise.
 - Anton: self-hosted through `@fontsource/anton`; font license is included in the installed package.

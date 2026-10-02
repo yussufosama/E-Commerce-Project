@@ -60,6 +60,75 @@ async function request(url, { method = 'GET', body, cookie, headers = {} } = {})
   return { status: response.status, body: text ? JSON.parse(text) : null, cookie: response.headers.get('set-cookie'), headers: response.headers };
 }
 const cartItem = quantity => ({ productId: product._id.toString(), size: 'M', color: 'Black', quantity });
+
+test('shipping setup is admin-only and never returns provider credentials', async () => {
+  const url = '/api/admin/dashboard/shipping';
+  assert.equal((await request(url)).status, 401);
+  assert.equal((await request(url, { cookie: customerCookie })).status, 403);
+  const previousKey = process.env.BOSTA_API_KEY;
+  try {
+    process.env.BOSTA_API_KEY = 'test-secret-never-return';
+    const result = await request(url, { cookie: adminCookie });
+    assert.equal(result.status, 200);
+    assert.equal(result.body.keyConfigured, true);
+    assert.equal(JSON.stringify(result.body).includes('test-secret-never-return'), false);
+    assert.deepEqual(Object.keys(result.body).sort(), ['keyConfigured', 'pickupConfigured', 'shippingConfigured']);
+  } finally {
+    if (previousKey === undefined) delete process.env.BOSTA_API_KEY;
+    else process.env.BOSTA_API_KEY = previousKey;
+  }
+});
+
+test('analytics restrict access, validate periods, fill empty days and exclude cancelled orders', async () => {
+  const url = '/api/admin/dashboard/analytics';
+  assert.equal((await request(url)).status, 401);
+  assert.equal((await request(url, { cookie: customerCookie })).status, 403);
+  for (const query of ['days=365', 'days=7&days=30', 'days[$gt]=1']) {
+    assert.equal((await request(`${url}?${query}`, { cookie: adminCookie })).status, 400);
+  }
+  const empty = await request(`${url}?days=7`, { cookie: adminCookie });
+  assert.equal(empty.body.daily.length, 7);
+  assert.equal(empty.body.current.sales, 0);
+  await add();
+  const created = await checkout();
+  const sales = await request(`${url}?days=7`, { cookie: adminCookie });
+  assert.equal(sales.body.current.sales, 65000);
+  assert.equal(sales.body.current.orders, 1);
+  assert.equal(sales.body.current.average, 65000);
+  assert.equal(sales.body.current.collected, 0);
+  assert.equal(sales.body.topProducts[0].units, 1);
+  assert.equal(sales.body.daily.reduce((sum, row) => sum + row.sales, 0), 65000);
+  assert.equal((await request(`/api/orders/${created.body.order._id}/cancel`, { method: 'POST', cookie: customerCookie, body: {} })).status, 200);
+  const cancelled = await request(`${url}?days=7`, { cookie: adminCookie });
+  assert.equal(cancelled.body.current.orders, 0);
+  assert.equal(cancelled.body.topProducts.length, 0);
+});
+
+test('admin dashboard rejects customers and reports stock, fulfilment and collected payments', async () => {
+  assert.equal((await request('/api/admin/dashboard')).status, 401);
+  assert.equal((await request('/api/admin/dashboard', { cookie: customerCookie })).status, 403);
+  const initial = await request('/api/admin/dashboard', { cookie: adminCookie });
+  assert.equal(initial.status, 200);
+  assert.equal(initial.body.activeProducts, 1);
+  assert.equal(initial.body.lowStockVariants, 1);
+  assert.equal(initial.body.collectedPiastres, 0);
+  await add();
+  const created = await checkout();
+  assert.equal(created.status, 201);
+  const pending = await request('/api/admin/dashboard', { cookie: adminCookie });
+  assert.equal(pending.body.ordersByStatus.pending, 1);
+  assert.equal(pending.body.collectedPiastres, 0);
+  for (const status of ['confirmed', 'shipped', 'delivered']) {
+    assert.equal((await request(`/api/admin/orders/${created.body.order._id}/status`, { method: 'PATCH', cookie: adminCookie, body: { status } })).status, 200);
+  }
+  const result = await request('/api/admin/dashboard', { cookie: adminCookie });
+  assert.equal(result.body.ordersByStatus.pending, 0);
+  assert.equal(result.body.ordersByStatus.delivered, 1);
+  assert.equal(result.body.collectedPiastres, 70000);
+  assert.equal(result.body.recentOrders.length, 1);
+  assert.equal(result.body.recentOrders[0].requestHash, undefined);
+  assert.equal(result.body.recentOrders[0].address, undefined);
+});
 const checkoutBody = (subtotal = 65000) => ({ address, paymentMethod: 'cash_on_delivery', expectedSubtotalPiastres: subtotal, expectedTotalPiastres: subtotal + 5000 });
 async function add(cookie = customerCookie, quantity = 1) {
   const result = await request('/api/cart/items', { method: 'PUT', cookie, body: cartItem(quantity) });

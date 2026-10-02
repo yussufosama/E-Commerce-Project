@@ -10,11 +10,19 @@ if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
 } else {
   try {
     await connectDatabase();
-    const result = await User.updateOne({ email }, { $set: { role: 'admin' } });
-    if (!result.matchedCount) throw new Error('missing-user');
-    console.log('Existing account granted admin access.');
+    const account = await User.findOne({ email }).select('_id emailVerified');
+    if (!account) {
+      console.error('No registered account matches this email. Register with this exact email on the website first.');
+      process.exitCode = 1;
+    } else if (!account.emailVerified) {
+      console.error('This account is registered but its email is not verified. Complete email verification before granting admin access.');
+      process.exitCode = 1;
+    } else {
+      await User.updateOne({ _id: account._id, emailVerified: true }, { $set: { role: 'admin' } });
+      console.log('Existing verified account granted admin access. Sign in with its existing password.');
+    }
   } catch {
-    console.error('Could not promote the account. Register it first and check the database connection.');
+    console.error('Could not connect to or update MongoDB. Check MONGODB_URI in backend/.env, Atlas Network Access for your current IP, and the database user credentials. No password or connection string is printed here.');
     process.exitCode = 1;
   } finally { await mongoose.disconnect(); }
 }

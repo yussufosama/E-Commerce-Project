@@ -13,7 +13,8 @@
     "seed": "node --env-file-if-exists=.env scripts/seed.js",
     "test": "node scripts/run-tests.js",
     "make-admin": "node --env-file-if-exists=.env scripts/make-admin.js",
-    "check:launch": "node --env-file-if-exists=.env scripts/check-launch.js"
+    "check:launch": "node --env-file-if-exists=.env scripts/check-launch.js",
+    "check:email": "node --env-file-if-exists=.env scripts/check-email.js"
   },
   "dependencies": {
     "cookie-parser": "^1.4.7",

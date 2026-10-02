@@ -61,7 +61,7 @@ function Manifesto() {
     <section id="manifesto" className="manifesto">
       <div className="manifesto-art">
         <img
-          src="/assets/triple-seven-logo.jpeg"
+          src="/assets/triple-seven-black-transparent.png"
           alt="Triple Seven 777 cube logo"
           loading="lazy"
         />
@@ -240,14 +240,14 @@ export function App({ recovery }) {
           <p className="empty">Loading your account…</p>
         ) : !user ? (
           <section className="empty">
-            <h1>YOUR NEXT MOVE.</h1>
+            <h1>{view === "admin" ? "STAFF ACCESS." : "YOUR NEXT MOVE."}</h1>
             <p>
               Sign in to view your{" "}
               {view === "bag"
                 ? "bag"
                 : view === "orders"
                   ? "orders"
-                  : "account"}
+                  : "admin dashboard with a verified admin account"}
               .
             </p>
             <button className="primary" onClick={() => setAccount("login")}>

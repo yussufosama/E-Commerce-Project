@@ -93,12 +93,12 @@ select:focus-visible {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  border-bottom: 1px solid var(--line);
-  background: #171816ed;
+  border-bottom: 1px solid transparent;
+  background: transparent;
   position: sticky;
   top: 0;
   z-index: 20;
-  backdrop-filter: blur(14px);
+  mix-blend-mode: difference;
 }
 .site-header nav,
 .header-actions {
@@ -426,15 +426,17 @@ p {
   min-height: 530px;
 }
 .manifesto-art {
-  padding: 70px;
+  padding: 24px;
   display: flex;
   align-items: center;
   justify-content: center;
   border-right: 1px solid #20221c18;
+  overflow: hidden;
 }
 .manifesto-art img {
-  width: min(100%, 350px);
-  mix-blend-mode: multiply;
+  width: 100%;
+  display: block;
+  object-fit: contain;
 }
 .manifesto-copy {
   padding: 58px 50px;
@@ -447,16 +449,16 @@ p {
   color: #6c7060;
 }
 .manifesto-copy h2 {
-  font-size: clamp(34px, 4.6vw, 67px);
-  line-height: 1.03;
+  font-size: clamp(32px, 3.8vw, 56px);
+  line-height: 1.15;
   margin: 0;
-  letter-spacing: -0.5px;
+  letter-spacing: 0.2px;
 }
 .manifesto-copy p {
-  font-family: "Courier New", monospace;
-  font-size: 9px;
-  letter-spacing: 1px;
-  line-height: 1.9;
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 12px;
+  letter-spacing: 0.5px;
+  line-height: 1.8;
   margin: 0;
   max-width: 420px;
 }
@@ -847,7 +849,7 @@ fieldset {
     display: none;
   }
   .manifesto-art {
-    padding: 40px;
+    padding: 20px;
   }
   .manifesto-copy {
     padding: 40px 28px;
@@ -875,6 +877,10 @@ fieldset {
   .site-header {
     height: 65px;
     padding: 0 20px;
+  }
+  .site-header:has(nav.open) {
+    mix-blend-mode: normal;
+    background: #171816;
   }
   .wordmark {
     font-size: 18px;
@@ -1009,22 +1015,23 @@ fieldset {
     min-height: 0;
   }
   .manifesto-art {
-    padding: 35px 55px;
+    padding: 20px;
+    aspect-ratio: 1;
     border-right: 0;
     border-bottom: 1px solid #20221c18;
   }
   .manifesto-art img {
-    width: 220px;
+    width: 100%;
   }
   .manifesto-copy {
     padding: 35px 26px;
     gap: 25px;
   }
   .manifesto-copy h2 {
-    font-size: 39px;
+    font-size: clamp(28px, 7.5vw, 44px);
   }
   .manifesto-copy p {
-    font-size: 8px;
+    font-size: 11px;
   }
   footer {
     padding-top: 45px;

@@ -6,6 +6,7 @@ import cookieParser from 'cookie-parser';
 import { rateLimit } from 'express-rate-limit';
 import { protectBrowserWrites } from './middleware/auth.middleware.js';
 import { adminProductRoutes } from './module/product/product.admin.routes.js';
+import { adminDashboardRoutes } from './module/order/admin.dashboard.js';
 import { cartRoutes } from './module/cart/cart.routes.js';
 import { orderRoutes, adminOrderRoutes } from './module/order/order.routes.js';
 import { userRoutes } from './module/user/user.routes.js';
@@ -44,6 +45,7 @@ export function createApp({ productModel = Product, databaseReady = () => mongoo
   app.use('/api/cart', cartRoutes());
   app.use('/api/orders', orderRoutes());
   app.use('/api/admin/products', adminProductRoutes());
+  app.use('/api/admin/dashboard', adminDashboardRoutes());
   app.use('/api/admin/orders', adminOrderRoutes());
   app.use(notFound);
   app.use(errorHandler);
